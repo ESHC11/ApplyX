@@ -1,0 +1,7 @@
+/* Este archivo contenía los estilos por defecto de Vite que limitaban el ancho de la pantalla */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
