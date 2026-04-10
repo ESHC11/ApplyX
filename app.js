@@ -7,6 +7,7 @@ const jobsRoutes      = require('./routes/jobs');
 const favoritosRoutes = require('./routes/favoritos');
 const usuariosRoutes  = require('./routes/usuarios');
 const notificacionesRoutes = require('./routes/notificaciones');
+const manualJobsRoutes = require('./routes/manual_jobs');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/jobs', jobsRoutes);
 app.use('/api/favoritos', favoritosRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/notificaciones', notificacionesRoutes);
+app.use('/api/manual-jobs', manualJobsRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Job Search API funcionando ✅' });

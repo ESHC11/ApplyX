@@ -61,12 +61,57 @@ router.post('/login', async (req, res) => {
 // GET /api/usuarios/:id
 router.get('/:id', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT id_usuario, nombre, correo, rol, fecha_registro FROM usuarios WHERE id_usuario = ?', [req.params.id]
+        const [rows] = await db.query('SELECT id_usuario, nombre, correo, rol, skills, fecha_registro FROM usuarios WHERE id_usuario = ?', [req.params.id]
         );
         if (!rows.length) return res.status(404).json({error: 'Usuario no encontrado' });
-        res.json(rows[0]);
+        
+        let user = rows[0];
+        try { user.skills = JSON.parse(user.skills || '[]'); } catch(e) { user.skills = []; }
+        res.json(user);
     } catch (error) {
         res.status(500).json({error: error.message });
+    }
+});
+
+// PATCH /api/usuarios/:id/skills
+const authMiddleware = require('../middleware/auth');
+router.patch('/:id/skills', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { skills } = req.body;
+        
+        if (parseInt(id) !== req.user.id) {
+            return res.status(403).json({ error: 'No tienes permisos' });
+        }
+        
+        const skillsStr = JSON.stringify(skills || []);
+        await db.query('UPDATE usuarios SET skills = ? WHERE id_usuario = ?', [skillsStr, id]);
+        
+        res.json({ message: 'Skills actualizadas correctamente' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// PATCH /api/usuarios/:id/perfil
+router.patch('/:id/perfil', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, correo } = req.body;
+        
+        if (parseInt(id) !== req.user.id) {
+            return res.status(403).json({ error: 'No tienes permisos' });
+        }
+        
+        if (!nombre || !correo) {
+            return res.status(400).json({ error: 'Faltan campos obligatorios' });
+        }
+        
+        await db.query('UPDATE usuarios SET nombre = ?, correo = ? WHERE id_usuario = ?', [nombre, correo, id]);
+        
+        res.json({ success: true, message: 'Perfil actualizado correctamente' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 

@@ -176,28 +176,98 @@ async function fetchAndNormalizeRemotive(search, limit) {
     }));
 }
 
+// ── Mapa de traducción español → inglés ───────────────────────────────────
+const SKILLS_EN = {
+    // Tecnología (already in English, but add common Spanish variants)
+    'javascript': 'javascript', 'typescript': 'typescript',
+    'react': 'react', 'node.js': 'nodejs', 'python': 'python',
+    'sql': 'sql', 'devops': 'devops', 'ux/ui': 'ux design',
+    'ciberseguridad': 'cybersecurity', 'data science': 'data science',
+    // Salud
+    'enfermería': 'nursing', 'medicina general': 'healthcare',
+    'psicología': 'psychology', 'nutrición': 'nutrition',
+    'fisioterapia': 'physiotherapy', 'farmacia': 'pharmacy',
+    'radiología': 'radiology', 'odontología': 'dentistry',
+    // Educación
+    'docencia': 'teaching', 'pedagogía': 'education',
+    'tutoría': 'tutoring', 'e-learning': 'e-learning',
+    'orientación educativa': 'academic counseling',
+    'educación especial': 'special education', 'idiomas': 'language',
+    // Ventas & Marketing
+    'ventas b2b': 'b2b sales', 'marketing digital': 'digital marketing',
+    'seo/sem': 'seo', 'crm': 'crm',
+    'email marketing': 'email marketing', 'redes sociales': 'social media',
+    'growth hacking': 'growth hacking',
+    // Logística
+    'supply chain': 'supply chain', 'almacén': 'warehouse',
+    'distribución': 'distribution', 'importación': 'import export',
+    'exportación': 'export', 'compras': 'procurement',
+    'flota vehicular': 'fleet management',
+    // Finanzas
+    'contabilidad': 'accounting', 'auditoría': 'audit',
+    'finanzas corporativas': 'corporate finance', 'nómina': 'payroll',
+    'fiscal': 'tax', 'tesorería': 'treasury', 'inversiones': 'investment',
+    // Administración
+    'recursos humanos': 'human resources',
+    'gestión de proyectos': 'project management',
+    'atención al cliente': 'customer service',
+    'secretariado': 'administrative', 'calidad': 'quality assurance',
+    'legal': 'legal',
+    // Diseño & Creatividad
+    'diseño gráfico': 'graphic design', 'ilustración': 'illustration',
+    'fotografía': 'photography', 'video': 'video production',
+    'animación': 'animation', 'arquitectura': 'architecture',
+    'moda': 'fashion',
+};
+
+function translateSkill(skill) {
+    const key = skill.toLowerCase().trim();
+    return SKILLS_EN[key] || skill; // si no hay traducción, usar el original
+}
+
 // RUTA UNIFICADA CENTRALIZADA
 router.get('/all', async (req, res) => {
-    const search = (req.query.search || '').trim();
-    const page   = Math.max(1, parseInt(req.query.page)  || 1);
-    const limit  = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const rawSearch = (req.query.search || '').trim();
+    const page      = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit     = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
 
-    // Llamadas en paralelo a las 4 APIs
-    const [jobicyJobs, theMuseJobs, arbeitnowJobs, remotiveJobs] = await Promise.all([
-        fetchAndNormalizeJobicy(search, limit),
-        fetchAndNormalizeTheMuse(search, page, limit),
-        fetchAndNormalizeArbeitnow(search, limit),
-        fetchAndNormalizeRemotive(search, limit)
-    ]);
+    // Dividir por coma y traducir cada skill al inglés
+    const skillTerms = rawSearch
+        ? [...new Set(
+            rawSearch.split(',')
+              .map(s => s.trim())
+              .filter(Boolean)
+              .map(translateSkill)
+          )]
+        : [''];
 
-    // Combinar todos los resultados
-    const allJobs = [...jobicyJobs, ...theMuseJobs, ...arbeitnowJobs, ...remotiveJobs];
+    // Buscar con cada término en paralelo y combinar resultados
+    const perSkillLimit = Math.ceil(limit / Math.max(skillTerms.length, 1));
+
+    const allResults = await Promise.all(
+        skillTerms.map(async (search) => {
+            const [jobicyJobs, theMuseJobs, arbeitnowJobs, remotiveJobs] = await Promise.all([
+                fetchAndNormalizeJobicy(search, perSkillLimit),
+                fetchAndNormalizeTheMuse(search, page, perSkillLimit),
+                fetchAndNormalizeArbeitnow(search, perSkillLimit),
+                fetchAndNormalizeRemotive(search, perSkillLimit),
+            ]);
+            return [...jobicyJobs, ...theMuseJobs, ...arbeitnowJobs, ...remotiveJobs];
+        })
+    );
+
+    // Aplanar y deduplicar por id
+    const seen = new Set();
+    const allJobs = allResults.flat().filter(job => {
+        if (seen.has(job.id)) return false;
+        seen.add(job.id);
+        return true;
+    });
 
     // Ordenar por fecha
     allJobs.sort((a, b) => b.publishedAt - a.publishedAt);
 
-    // Serializar fechas a ISO string para el JSON final
-    const jobs = allJobs.map((job) => ({
+    const jobs = allJobs.map(job => ({
         ...job,
         publishedAt: job.publishedAt.toISOString(),
     }));
@@ -206,13 +276,8 @@ router.get('/all', async (req, res) => {
         success : true,
         total   : jobs.length,
         page,
-        search  : search || null,
-        sources : {
-            jobicy    : jobicyJobs.length,
-            themuse   : theMuseJobs.length,
-            arbeitnow : arbeitnowJobs.length,
-            remotive  : remotiveJobs.length
-        },
+        search  : rawSearch || null,
+        skills  : skillTerms,
         jobs,
     });
 });
