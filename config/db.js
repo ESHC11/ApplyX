@@ -1,14 +1,22 @@
 const mysql = require('mysql2');
 require('dotenv').config();
 
-const pool = process.env.DATABASE_URL 
-    ? mysql.createPool(process.env.DATABASE_URL)
-    : mysql.createPool({
-          host    : process.env.DB_HOST,
-          user    : process.env.DB_USER,
-          password: process.env.DB_PASSWORD,
-          database: process.env.DB_NAME,
-      });
+let pool;
+if (process.env.DATABASE_URL) {
+    // Aiven y otras nubes exigen SSL, mysql2 ignora "?ssl-mode=REQUIRED" en el string,
+    // por ende debemos pasar el string y forzar la propiedad ssl en las opciones.
+    pool = mysql.createPool({
+        uri: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+} else {
+    pool = mysql.createPool({
+        host    : process.env.DB_HOST,
+        user    : process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+    });
+}
 
 // Verificar conexión al iniciar
 pool.getConnection((err, connection) => {

@@ -4,6 +4,19 @@ const db = require('./config/db');
 async function migrate() {
     console.log('Iniciando migración de la base de datos...');
     try {
+        // 0. Crear tabla usuarios si no existe (importante para nuevas nubes)
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(255) NOT NULL,
+                correo VARCHAR(255) NOT NULL UNIQUE,
+                password VARCHAR(255) NOT NULL,
+                rol VARCHAR(50) DEFAULT 'usuario',
+                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ Tabla "usuarios" lista');
+
         // 1. Añadir columna skills (TEXT para soportar JSON largo)
         try {
             await db.query(`ALTER TABLE usuarios ADD COLUMN skills TEXT DEFAULT NULL`);
