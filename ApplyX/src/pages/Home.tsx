@@ -355,7 +355,7 @@ export default function Home() {
                   </span>
                   <button 
                     onClick={() => setPage(p => p + 1)}
-                    disabled={fetchingExternal || externalJobs.length === 0}
+                    disabled={fetchingExternal || externalJobs.length < 10}
                     className="home-retry-btn" style={{ margin: 0 }}
                   >
                     Siguiente →

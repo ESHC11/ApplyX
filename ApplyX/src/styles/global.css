@@ -2,35 +2,35 @@
 
 /* ── Design tokens ────────────────────────────────────────────────────────── */
 :root {
-  --blue-900: #0c1e3a;
-  --blue-800: #122d56;
-  --blue-700: #1a3f75;
-  --blue-600: #1d4ed8;
-  --blue-500: #2563eb;
-  --blue-400: #3b82f6;
-  --blue-300: #93c5fd;
-  --blue-100: #dbeafe;
-  --blue-50:  #eff6ff;
+  --blue-900: #0f172a;
+  --blue-800: #1e293b;
+  --blue-700: #334155;
+  --blue-600: #475569;
+  --blue-500: #64748b;
+  --blue-400: #94a3b8;
+  --blue-300: #cbd5e1;
+  --blue-100: #f1f5f9;
+  --blue-50:  #f8fafc;
 
-  --primary:        #2563eb;
-  --primary-dark:   #1d4ed8;
-  --primary-light:  #eff6ff;
-  --primary-glow:   rgba(37, 99, 235, 0.15);
+  --primary:        #0f172a;
+  --primary-dark:   #020617;
+  --primary-light:  #f1f5f9;
+  --primary-glow:   rgba(15, 23, 42, 0.15);
 
-  --bg:        #f8faff;
+  --bg:        #fafafa;
   --surface:   #ffffff;
-  --border:    #e2e8f4;
-  --text:      #0f172a;
-  --text-soft: #475569;
-  --text-muted:#94a3b8;
+  --border:    #eaeaea;
+  --text:      #111111;
+  --text-soft: #444444;
+  --text-muted:#888888;
 
   --radius-card: 20px;
   --radius-btn:  14px;
   --radius-pill: 9999px;
 
   --shadow-sm:   0 1px 4px rgba(15,23,42,0.06);
-  --shadow-md:   0 4px 20px rgba(37,99,235,0.08);
-  --shadow-lg:   0 8px 32px rgba(37,99,235,0.14);
+  --shadow-md:   0 4px 20px rgba(15,23,42,0.08);
+  --shadow-lg:   0 8px 32px rgba(15,23,42,0.14);
 }
 
 /* ── Reset ────────────────────────────────────────────────────────────────── */
@@ -59,7 +59,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 /* — Panel superior azul — */
 .login-top {
-  background: linear-gradient(150deg, var(--blue-800) 0%, var(--blue-600) 60%, var(--blue-400) 100%);
+  background: var(--primary);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -99,12 +99,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   line-height: 1.6;
 }
 
-/* Círculos decorativos */
-.login-blob {
-  position: absolute; border-radius: 50%;
-  background: rgba(255,255,255,0.07);
-  pointer-events: none;
-}
+/* Círculos decorativos - Ocultos por diseño más profesional */
+.login-blob { display: none; }
 .login-blob-1 { width: 220px; height: 220px; top: -70px; right: -70px; }
 .login-blob-2 { width: 150px; height: 150px; bottom: 10px; left: -50px; }
 

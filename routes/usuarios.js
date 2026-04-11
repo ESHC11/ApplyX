@@ -3,6 +3,9 @@ const router = express.Router();
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 //POST /api/usuarios
 // POST /api/usuarios/register
@@ -55,6 +58,59 @@ router.post('/login', async (req, res) => {
         res.json({ token });
     } catch (error) {
         res.status(500).json({error: error.message });
+    }
+});
+
+// POST /api/usuarios/google
+router.post('/google', async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) return res.status(400).json({ error: 'Token es requerido' });
+
+        const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!googleRes.ok) {
+            return res.status(401).json({ error: 'Token de Google inválido' });
+        }
+
+        const payload = await googleRes.json();
+        const { email, name } = payload;
+
+        // Comprobar si el usuario existe
+        const [rows] = await db.query('SELECT * FROM usuarios WHERE correo = ?', [email]);
+        
+        let id_usuario;
+
+        if (rows.length > 0) {
+            id_usuario = rows[0].id_usuario;
+        } else {
+            // Usuario nuevo, crear cuenta
+            // Generar password random muy seguro ya que se loguea por Google
+            const randomPassword = require('crypto').randomBytes(16).toString('hex');
+            const hash = await bcrypt.hash(randomPassword, 10);
+            const rol = 'usuario';
+
+            const [result] = await db.query(
+                'INSERT INTO usuarios (nombre, correo, password, rol) VALUES (?, ?, ?, ?)',
+                [name, email, hash, rol]
+            );
+            id_usuario = result.insertId;
+        }
+
+        // Generar JWT local
+        const jwtToken = jwt.sign(
+            { id: id_usuario },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        res.json({ token: jwtToken });
+
+    } catch (error) {
+        console.error('Error Google Auth:', error);
+        res.status(500).json({ error: 'Error autenticando con Google' });
     }
 });
 

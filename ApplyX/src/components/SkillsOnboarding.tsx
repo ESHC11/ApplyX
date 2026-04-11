@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { updateUsuarioSkills } from "../services/api";
 import "../styles/global.css";
 
@@ -7,26 +7,28 @@ interface SkillsOnboardingProps {
   onComplete: (skills: string[]) => void;
 }
 
+import { Laptop, Stethoscope, BookOpen, TrendingUp, Truck, CircleDollarSign, Building, Palette } from "lucide-react";
+
 interface Category {
-  id: string; label: string; emoji: string; color: string; skills: string[];
+  id: string; label: string; icon: ReactNode; color: string; skills: string[];
 }
 
 const CATEGORIES: Category[] = [
-  { id: "tech",      label: "Tecnología",        emoji: "💻", color: "#2563eb",
+  { id: "tech",      label: "Tecnología",        icon: <Laptop size={16} />, color: "#0f172a",
     skills: ["JavaScript","TypeScript","React","Node.js","Python","SQL","DevOps","UX/UI","Ciberseguridad","Data Science"] },
-  { id: "health",    label: "Salud",              emoji: "🏥", color: "#0891b2",
+  { id: "health",    label: "Salud",              icon: <Stethoscope size={16} />, color: "#334155",
     skills: ["Enfermería","Medicina General","Psicología","Nutrición","Fisioterapia","Farmacia","Radiología","Odontología"] },
-  { id: "education", label: "Educación",          emoji: "📚", color: "#7c3aed",
+  { id: "education", label: "Educación",          icon: <BookOpen size={16} />, color: "#475569",
     skills: ["Docencia","Pedagogía","Tutoría","E-learning","Orientación Educativa","Educación Especial","Idiomas"] },
-  { id: "sales",     label: "Ventas & Marketing", emoji: "📈", color: "#0d9488",
+  { id: "sales",     label: "Ventas & Marketing", icon: <TrendingUp size={16} />, color: "#1e293b",
     skills: ["Ventas B2B","Marketing Digital","SEO/SEM","CRM","Email Marketing","Redes Sociales","Growth Hacking"] },
-  { id: "logistics", label: "Logística",          emoji: "🚚", color: "#1d4ed8",
+  { id: "logistics", label: "Logística",          icon: <Truck size={16} />, color: "#0f172a",
     skills: ["Supply Chain","Almacén","Distribución","Importación","Exportación","Compras","Flota Vehicular"] },
-  { id: "finance",   label: "Finanzas",           emoji: "💰", color: "#0284c7",
+  { id: "finance",   label: "Finanzas",           icon: <CircleDollarSign size={16} />, color: "#1e293b",
     skills: ["Contabilidad","Auditoría","Finanzas Corporativas","Nómina","Fiscal","Tesorería","Inversiones"] },
-  { id: "admin",     label: "Administración",     emoji: "🗂️", color: "#4f46e5",
+  { id: "admin",     label: "Administración",     icon: <Building size={16} />, color: "#334155",
     skills: ["Recursos Humanos","Gestión de Proyectos","Atención al Cliente","Secretariado","Calidad","Legal"] },
-  { id: "creative",  label: "Diseño",             emoji: "🎨", color: "#0369a1",
+  { id: "creative",  label: "Diseño",             icon: <Palette size={16} />, color: "#475569",
     skills: ["Diseño Gráfico","Ilustración","Fotografía","Video","Animación","Arquitectura","Moda"] },
 ];
 
@@ -189,7 +191,7 @@ export default function SkillsOnboarding({ userId, onComplete }: SkillsOnboardin
                 className={`sob-cat-btn ${activeCategory === cat.id ? "active" : ""}`}
                 style={activeCategory === cat.id ? { background: cat.color } : {}}
                 onClick={() => setActiveCategory(cat.id)}>
-                {cat.emoji} {cat.label}
+                {cat.icon} {cat.label}
               </button>
             ))}
           </div>

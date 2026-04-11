@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/global.css';
-import { loginUsuario } from '../services/api';
+import { loginUsuario, loginGoogleUsuario } from '../services/api';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,6 +25,23 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (codeResponse) => {
+      setError('');
+      setLoading(true);
+      try {
+        const data = await loginGoogleUsuario(codeResponse.access_token);
+        localStorage.setItem('token', data.token);
+        navigate('/home');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Error al iniciar sesión con Google');
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: (error) => setError('Fallo el inicio de sesión con Google'),
+  });
 
   return (
     <div className="login-container">
@@ -72,7 +90,7 @@ const Login = () => {
 
           <div className="login-divider"><span>o continúa con</span></div>
 
-          <button type="button" className="login-google-btn">
+          <button type="button" className="login-google-btn" onClick={() => loginWithGoogle()}>
             <svg viewBox="0 0 24 24" width="20" height="20">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

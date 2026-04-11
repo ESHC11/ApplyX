@@ -188,6 +188,7 @@ const SKILLS_EN = {
     'psicología': 'psychology', 'nutrición': 'nutrition',
     'fisioterapia': 'physiotherapy', 'farmacia': 'pharmacy',
     'radiología': 'radiology', 'odontología': 'dentistry',
+    'medicina': 'healthcare', 'salud': 'healthcare',
     // Educación
     'docencia': 'teaching', 'pedagogía': 'education',
     'tutoría': 'tutoring', 'e-learning': 'e-learning',
@@ -258,11 +259,42 @@ router.get('/all', async (req, res) => {
 
     // Aplanar y deduplicar por id
     const seen = new Set();
-    const allJobs = allResults.flat().filter(job => {
+    let allJobs = allResults.flat().filter(job => {
         if (seen.has(job.id)) return false;
         seen.add(job.id);
         return true;
     });
+
+    // Filtro estricto para evitar que las APIs devuelvan resultados genéricos (ej. Software)
+    // cuando no encuentran nada para áreas como "Medicina"
+    if (skillTerms.length > 0 && skillTerms[0] !== '') {
+        const isTechQuery = skillTerms.some(term => 
+            ['javascript','typescript','react','node','python','sql','devops','ux','cybersecurity','data science','software','developer','engineer','tech'].some(kw => term.toLowerCase().includes(kw))
+        );
+
+        const techExclusions = ['developer', 'software', 'backend', 'frontend', 'fullstack', 'full stack', 'ios', 'android', 'devops', 'programmer'];
+
+        allJobs = allJobs.filter(job => {
+            // First pass: does the job text include any of the skill terms?
+            const matchesSkill = skillTerms.some(term => {
+                const q = term.toLowerCase();
+                const textToSearch = `${job.title} ${job.company} ${job.tags ? job.tags.join(' ') : ''} ${job.description}`.toLowerCase();
+                return textToSearch.includes(q);
+            });
+
+            if (!matchesSkill) return false;
+
+            // Second pass: if it's NOT a tech query, exclude jobs with blatant tech titles
+            if (!isTechQuery) {
+                const titleLower = (job.title || '').toLowerCase();
+                if (techExclusions.some(ex => titleLower.includes(ex))) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
 
     // Ordenar por fecha
     allJobs.sort((a, b) => b.publishedAt - a.publishedAt);

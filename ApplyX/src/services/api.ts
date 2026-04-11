@@ -51,6 +51,18 @@ export const loginUsuario = async (correo: string, password: string) => {
     return data;
 };
 
+// Google Login
+export const loginGoogleUsuario = async (token: string) => {
+    const res = await fetch(`${BASE_URL}/usuarios/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al iniciar sesión con Google');
+    return data;
+};
+
 // ---- VACANTES EXTERNAS ----
 // El backend devuelve { success, total, jobs: [...] }
 // Home.tsx espera un array directo → extraemos data.jobs
