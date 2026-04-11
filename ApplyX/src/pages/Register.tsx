@@ -40,7 +40,7 @@ const Register = () => {
         setLoading(false);
       }
     },
-    onError: (error) => setError('Fallo el registro con Google'),
+    onError: () => setError('Fallo el registro con Google'),
   });
 
   return (

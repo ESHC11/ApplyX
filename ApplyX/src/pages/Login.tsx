@@ -40,7 +40,7 @@ const Login = () => {
         setLoading(false);
       }
     },
-    onError: (error) => setError('Fallo el inicio de sesión con Google'),
+    onError: () => setError('Fallo el inicio de sesión con Google'),
   });
 
   return (

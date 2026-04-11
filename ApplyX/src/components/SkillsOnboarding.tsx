@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { updateUsuarioSkills } from "../services/api";
 import "../styles/global.css";
 
