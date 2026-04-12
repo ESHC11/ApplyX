@@ -63,6 +63,7 @@ export const loginGoogleUsuario = async (token: string) => {
     return data;
 };
 
+
 // ---- VACANTES EXTERNAS ----
 // El backend devuelve { success, total, jobs: [...] }
 // Home.tsx espera un array directo → extraemos data.jobs

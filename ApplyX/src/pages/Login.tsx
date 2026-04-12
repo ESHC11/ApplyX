@@ -82,8 +82,6 @@ const Login = () => {
 
           {error && <p style={{ color: '#dc2626', fontSize: '13px', marginBottom: '12px' }}>⚠️ {error}</p>}
 
-          <span className="login-forgot">¿Olvidaste tu contraseña?</span>
-
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? 'Iniciando...' : 'Iniciar sesión'}
           </button>

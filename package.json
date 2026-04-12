@@ -21,6 +21,7 @@
     "google-auth-library": "^10.6.2",
     "jsonwebtoken": "^9.0.3",
     "jwt-decode": "^4.0.0",
-    "mysql2": "^3.19.1"
+    "mysql2": "^3.19.1",
+    "nodemailer": "^8.0.5"
   }
 }

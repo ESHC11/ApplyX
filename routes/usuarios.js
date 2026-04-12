@@ -114,6 +114,8 @@ router.post('/google', async (req, res) => {
     }
 });
 
+
+
 // GET /api/usuarios/:id
 router.get('/:id', async (req, res) => {
     try {
